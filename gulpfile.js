@@ -174,8 +174,9 @@ function js() {
 
 function images() {
 	return src(path.src.images)
-		.pipe(webp())
 		.pipe(gulpif(isProd, imagemin()))
+		.pipe(dest(path.build.images))
+		.pipe(webp())
 		.pipe(dest(path.build.images))
 		.pipe(browserSync.stream())
 }
