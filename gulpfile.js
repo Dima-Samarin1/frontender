@@ -60,7 +60,7 @@ const path = {
 		css: srcPath + 'assets/templates/styles/scss/**/*.scss',
 		images:
 			srcPath + 'assets/templates/img/**/*.{jpg,jpeg,png,svg,ico,webp,gif}',
-		fonts: srcPath + 'assets/templates/fonts/**/*.{ttf,otf}',
+		fonts: srcPath + 'assets/templates/fonts/**/*.{woff,woff2}',
 		resources: srcPath + 'assets/templates/resources/**/*.*',
 		svgicons: srcPath + 'assets/templates/svgicons/*.svg',
 	},
