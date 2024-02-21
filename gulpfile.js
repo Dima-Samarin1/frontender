@@ -249,7 +249,7 @@ function deploy() {
 		log: gutil.log,
 	})
 
-	let globs = ['app/**']
+	let globs = ['dist/**']
 
 	return src(globs, {
 		base: './app',
