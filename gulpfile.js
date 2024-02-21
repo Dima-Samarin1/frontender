@@ -2,44 +2,38 @@ let preprocessor = 'scss'
 import browserSync from 'browser-sync'
 import del from 'del'
 import pkg from 'gulp'
-const { src, dest, parallel, series, watch } = pkg
 import autoprefixer from 'gulp-autoprefixer'
 import cleanCss from 'gulp-clean-css'
 import fileinclude from 'gulp-file-include'
 import gcmq from 'gulp-group-css-media-queries'
 import gulpif from 'gulp-if'
 import imagemin from 'gulp-imagemin'
-import newer from 'gulp-newer'
 import notify from 'gulp-notify'
 import plumber from 'gulp-plumber'
 import rename from 'gulp-rename'
 import replace from 'gulp-replace'
+import gulpSass from 'gulp-sass'
+import sassglob from 'gulp-sass-glob'
+import sourcemaps from 'gulp-sourcemaps'
 import svgSprite from 'gulp-svg-sprite'
 import svgmin from 'gulp-svgmin'
-import util from 'gulp-util'
 import versionNumber from 'gulp-version-number'
 import webp from 'gulp-webp'
 import webpcss from 'gulp-webpcss'
-import sourcemaps from 'gulp-sourcemaps'
-import zip from 'gulp-zip'
-import vinylFtp from 'vinyl-ftp'
-import webpack from 'webpack'
-import webpackStream from 'webpack-stream'
 import * as dartSass from 'sass'
-import gulpSass from 'gulp-sass'
-import less from 'gulp-less'
+import webpackStream from 'webpack-stream'
+const { src, dest, parallel, series, watch } = pkg
 
 const scss = gulpSass(dartSass)
-import sassglob from 'gulp-sass-glob'
 
 let isProd = false
 
 function server() {
 	browserSync.init({
 		// Initialize Browsersync
-		server: { baseDir: 'dist/' }, // Specify the server directory
-		notify: false, // Disable notifications
-		online: true, // Set online mode to true
+		server: { baseDir: 'dist/' },
+		notify: false,
+		online: true,
 	})
 }
 
@@ -131,7 +125,7 @@ function js() {
 						},
 					],
 				},
-				devtool: 'source-map',
+				devtool: !isProd ? 'source-map' : false,
 			})
 		)
 		.on('error', function (err) {
@@ -207,16 +201,16 @@ function toProd(done) {
 }
 
 export {
-	html,
-	styles,
-	js,
-	svgSprites,
-	images,
-	resources,
-	fonts,
-	server,
 	clean,
+	fonts,
+	html,
+	images,
+	js,
+	resources,
+	server,
 	startWatch,
+	styles,
+	svgSprites,
 }
 
 export default series(
