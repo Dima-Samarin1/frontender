@@ -1,0 +1,31 @@
+{
+	"background": {
+		"prefix": "bgimg",
+		"body": [
+			"background-image: url('');",
+			"background-size: cover;",
+			"background-repeat: no-repeat;"
+		],
+		"description": "background"
+	},
+	"burger-menu": {
+		"prefix": "burger",
+		"body": [
+			"<button class=\"mobile-nav-btn\">",
+			"<div class=\"nav-icon\"></div>",
+			"</button>"
+		],
+		"description": "burger-menu"
+	},
+	"nav": {
+		"prefix": "menu",
+		"body": [
+			"<nav class=\"nav\">",
+			"<ul class=\"list-reset nav__list\">",
+			"<li class=\"nav__item\"><a href=\"#\" class=\"nav__link\"></a></li>",
+			"</ul>",
+			"</nav>"
+		],
+		"description": "nav"
+	}
+}

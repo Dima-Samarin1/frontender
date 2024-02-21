@@ -1,0 +1,19 @@
+html {
+	scroll-behavior: smooth;
+}
+
+body {
+	background-color: var(--page-bg);
+	color: var(--text-color);
+	font-family: var(--font-main);
+}
+
+ul,
+li {
+	margin: 0;
+	padding: 0;
+}
+
+.list-reset {
+	list-style-type: none;
+}
