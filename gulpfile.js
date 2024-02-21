@@ -258,3 +258,5 @@ function deploy() {
 		.pipe(conn.newer(''))
 		.pipe(conn.dest(''))
 }
+
+export { deploy }
