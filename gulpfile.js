@@ -23,6 +23,8 @@ import webpcss from 'gulp-webpcss'
 import * as dartSass from 'sass'
 import webpackStream from 'webpack-stream'
 const { src, dest, parallel, series, watch } = pkg
+import gutil from 'gulp-util'
+import ftp from 'vinyl-ftp'
 
 const scss = gulpSass(dartSass)
 
@@ -237,3 +239,22 @@ export const build = series(
 	resources,
 	fonts
 )
+
+function deploy() {
+	let conn = ftp.create({
+		host: '',
+		user: '',
+		password: '',
+		parallel: 10,
+		log: gutil.log,
+	})
+
+	let globs = ['app/**']
+
+	return src(globs, {
+		base: './app',
+		buffer: false,
+	})
+		.pipe(conn.newer(''))
+		.pipe(conn.dest(''))
+}
