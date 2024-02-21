@@ -1,10 +1,8 @@
-/* Base */
-@import "./base/reset";
-@import "./base/vars";
-@import "./base/base";
-@import "./base/utils";
-@import "./base/containers";
-@import "./base/sticky-footer";
+@import 'vars';
+@import 'fonts';
+@import 'base/base';
+@import 'base/reset';
+@import 'base/utils';
+@import 'base/containers';
 
-/* Blocks */
-@import "./blocks/*.scss";
+@import './blocks/*.scss';

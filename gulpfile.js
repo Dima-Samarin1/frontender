@@ -1,6 +1,6 @@
-let preprocessor = 'scss'
 import browserSync from 'browser-sync'
 import del from 'del'
+import fs from 'fs'
 import pkg from 'gulp'
 import autoprefixer from 'gulp-autoprefixer'
 import cleanCss from 'gulp-clean-css'
@@ -20,19 +20,55 @@ import svgmin from 'gulp-svgmin'
 import versionNumber from 'gulp-version-number'
 import webp from 'gulp-webp'
 import webpcss from 'gulp-webpcss'
-import * as dartSass from 'sass'
+import dartSass from 'sass'
 import webpackStream from 'webpack-stream'
-const { src, dest, parallel, series, watch } = pkg
-import gutil from 'gulp-util'
-import ftp from 'vinyl-ftp'
 
-const scss = gulpSass(dartSass)
+const sass = gulpSass(dartSass)
+const { src, dest, parallel, series, watch } = pkg
 
 let isProd = false
 
+import * as nodePath from 'path'
+const rootFolder = nodePath.basename(nodePath.resolve())
+
+const srcPath = 'src/'
+const distPath = 'dist/'
+
+const path = {
+	build: {
+		html: distPath,
+		js: distPath + 'assets/templates/js/',
+		css: distPath + 'assets/templates/css/',
+		images: distPath + 'assets/templates/img/',
+		fonts: distPath + 'assets/templates/fonts/',
+		resources: distPath + '/',
+		svgicons: distPath + 'assets/templates/img/',
+	},
+	src: {
+		html: srcPath + '*.html',
+		js: srcPath + 'assets/templates/js/main.js',
+		css: srcPath + 'assets/templates/styles/scss/main.scss',
+		images:
+			srcPath + 'assets/templates/img/**/*.{jpg,jpeg,png,svg,ico,webp,gif}',
+		fonts: srcPath + 'assets/templates/fonts/**/*.{woff,woff2}',
+		resources: srcPath + 'assets/templates/resources/**/*.*',
+		svgicons: srcPath + 'assets/templates/svgicons/*.svg',
+	},
+	watch: {
+		html: srcPath + '**/*.html',
+		js: srcPath + 'assets/templates/js/**/*.js',
+		css: srcPath + 'assets/templates/styles/scss/**/*.scss',
+		images:
+			srcPath + 'assets/templates/img/**/*.{jpg,jpeg,png,svg,ico,webp,gif}',
+		fonts: srcPath + 'assets/templates/fonts/**/*.{ttf,otf}',
+		resources: srcPath + 'assets/templates/resources/**/*.*',
+		svgicons: srcPath + 'assets/templates/svgicons/*.svg',
+	},
+	clean: './' + distPath,
+}
+
 function server() {
 	browserSync.init({
-		// Initialize Browsersync
 		server: { baseDir: 'dist/' },
 		notify: false,
 		online: true,
@@ -40,7 +76,7 @@ function server() {
 }
 
 function html() {
-	return src('src/*.html')
+	return src(path.src.html)
 		.pipe(plumber())
 		.pipe(fileinclude())
 		.pipe(
@@ -59,14 +95,12 @@ function html() {
 				})
 			)
 		)
-		.pipe(dest('dist/'))
+		.pipe(dest(path.build.html))
 		.pipe(browserSync.stream())
 }
 
-function styles() {
-	return src(
-		'src/assets/templates/styles/' + preprocessor + '/main.' + preprocessor + ''
-	)
+function css() {
+	return src(path.src.css)
 		.pipe(
 			plumber({
 				errorHandler: function (err) {
@@ -79,7 +113,7 @@ function styles() {
 			})
 		)
 		.pipe(sassglob())
-		.pipe(eval(preprocessor)())
+		.pipe(sass())
 		.pipe(gulpif(!isProd, sourcemaps.init()))
 		.pipe(gulpif(isProd, gcmq()))
 		.pipe(
@@ -94,12 +128,12 @@ function styles() {
 		.pipe(gulpif(isProd, cleanCss({ level: 2 })))
 		.pipe(rename({ suffix: '.min' }))
 		.pipe(gulpif(!isProd, sourcemaps.write()))
-		.pipe(dest('dist/assets/templates/css'))
+		.pipe(dest(path.build.css))
 		.pipe(browserSync.stream())
 }
 
 function js() {
-	return src('src/assets/templates/js/main.js')
+	return src(path.src.js)
 		.pipe(
 			webpackStream({
 				mode: isProd ? 'production' : 'development',
@@ -127,29 +161,27 @@ function js() {
 						},
 					],
 				},
-				devtool: !isProd ? 'source-map' : false,
+				devtool: 'source-map',
 			})
 		)
 		.on('error', function (err) {
 			console.error('WEBPACK ERROR', err)
 			this.emit('end')
 		})
-		.pipe(dest('dist/assets/templates/js'))
+		.pipe(dest(path.build.js))
 		.pipe(browserSync.stream())
 }
 
 function images() {
-	return src('src/assets/templates/img/**/*.{jpg,jpeg,png,svg,ico,webp,gif}')
-		.pipe(src('src/assets/templates/img/**/*.{jpg,jpeg,png,svg,ico,gif}'))
+	return src(path.src.images)
 		.pipe(webp())
-		.pipe(src('src/assets/templates/img/**/*.{jpg,jpeg,png,svg,ico,gif}'))
 		.pipe(gulpif(isProd, imagemin()))
-		.pipe(dest('dist/assets/templates/img'))
+		.pipe(dest(path.build.images))
 		.pipe(browserSync.stream())
 }
 
 function svgSprites() {
-	return src('src/assets/templates/svgicons/*.svg')
+	return src(path.src.svgicons)
 		.pipe(
 			svgmin({
 				js2svg: {
@@ -167,20 +199,81 @@ function svgSprites() {
 				},
 			})
 		)
-		.pipe(dest('dist/assets/templates/img'))
+		.pipe(dest(path.build.svgicons))
 		.pipe(browserSync.stream())
 }
 
 function resources() {
-	return src('src/assets/templates/resources/**/*.*')
-		.pipe(dest('dist/'))
+	return src(path.src.resources)
+		.pipe(dest(path.build.resources))
 		.pipe(browserSync.stream())
 }
 
-function fonts() {
-	return src('src/assets/templates/fonts/*.{woff,woff2}').pipe(
-		dest('dist/assets/templates/fonts')
-	)
+function fonts(done) {
+	return src(path.src.fonts).pipe(dest(path.build.fonts)).on('end', done)
+}
+
+function fontStyle(done) {
+	let fontsFile = `${srcPath}assets/templates/styles/scss/fonts.scss`
+	fs.readdir(path.build.fonts, function (err, fontsFiles) {
+		if (fontsFiles) {
+			if (!fs.existsSync(fontsFile)) {
+				fs.writeFile(fontsFile, '', function (err) {
+					if (err) throw err
+					let newFileOnly
+					for (var i = 0; i < fontsFiles.length; i++) {
+						let fontFileName = fontsFiles[i].split('.')[0]
+						if (newFileOnly !== fontFileName) {
+							let fontName = fontFileName.split('-')[0]
+								? fontFileName.split('-')[0]
+								: fontFileName
+							let fontWeight = fontFileName.split('-')[1]
+								? fontFileName.split('-')[1]
+								: fontFileName
+							if (fontWeight.toLowerCase() === 'thin') {
+								fontWeight = 100
+							} else if (fontWeight.toLowerCase() === 'extralight') {
+								fontWeight = 200
+							} else if (fontWeight.toLowerCase() === 'light') {
+								fontWeight = 300
+							} else if (fontWeight.toLowerCase() === 'medium') {
+								fontWeight = 500
+							} else if (fontWeight.toLowerCase() === 'semibold') {
+								fontWeight = 600
+							} else if (fontWeight.toLowerCase() === 'bold') {
+								fontWeight = 700
+							} else if (
+								fontWeight.toLowerCase() === 'extrabold' ||
+								fontWeight.toLowerCase() === 'heavy'
+							) {
+								fontWeight = 800
+							} else if (fontWeight.toLowerCase() === 'black') {
+								fontWeight = 900
+							} else {
+								fontWeight = 400
+							}
+							fs.appendFile(
+								fontsFile,
+								`@font-face {
+                                font-family: ${fontName};
+                                font-display: swap;
+                                src: url("../fonts/${fontFileName}.woff2") format("woff2"),
+                                    url("../fonts/${fontFileName}.woff") format("woff");
+                                font-weight: ${fontWeight};
+                                font-style: normal;
+                                }\r\n`,
+								function (err) {
+									if (err) throw err
+								}
+							)
+							newFileOnly = fontFileName
+						}
+					}
+				})
+			}
+		}
+	})
+	done()
 }
 
 function clean() {
@@ -188,13 +281,12 @@ function clean() {
 }
 
 function startWatch() {
-	watch('src/**/*.html', html)
-	watch('src/assets/templates/styles/**/' + preprocessor + '/**/*', styles)
-	watch('src/assets/templates/js/**/*.js', js)
-	watch('src/assets/templates/img/**/*.{jpg,jpeg,png,svg,ico,webp,gif}', images)
-	watch('src/assets/templates/svgicons/*.svg', svgSprites)
-	watch('src/assets/templates/resources/**/*.*', resources)
-	watch('src/assets/templates/fonts/*.{woff,woff2}', resources)
+	watch(path.watch.html, html)
+	watch(path.watch.css, css)
+	watch(path.watch.js, js)
+	watch(path.watch.images, images)
+	watch(path.watch.svgicons, svgSprites)
+	watch(path.watch.resources, resources)
 }
 
 function toProd(done) {
@@ -204,6 +296,8 @@ function toProd(done) {
 
 export {
 	clean,
+	css,
+	fontStyle,
 	fonts,
 	html,
 	images,
@@ -211,28 +305,14 @@ export {
 	resources,
 	server,
 	startWatch,
-	styles,
 	svgSprites,
+	toProd,
 }
-
-export default series(
-	clean,
-	parallel(
-		html,
-		styles,
-		js,
-		svgSprites,
-		images,
-		resources,
-		fonts,
-		parallel(server, startWatch)
-	)
-)
 
 export const build = series(
 	toProd,
 	html,
-	styles,
+	css,
 	js,
 	svgSprites,
 	images,
@@ -240,23 +320,15 @@ export const build = series(
 	fonts
 )
 
-function deploy() {
-	let conn = ftp.create({
-		host: '',
-		user: '',
-		password: '',
-		parallel: 10,
-		log: gutil.log,
-	})
-
-	let globs = ['dist/**']
-
-	return src(globs, {
-		base: './app',
-		buffer: false,
-	})
-		.pipe(conn.newer(''))
-		.pipe(conn.dest(''))
-}
-
-export { deploy }
+export default series(
+	clean,
+	html,
+	css,
+	js,
+	fonts,
+	fontStyle,
+	images,
+	svgSprites,
+	resources,
+	parallel(server, startWatch)
+)
