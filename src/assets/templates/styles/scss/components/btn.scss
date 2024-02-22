@@ -1,0 +1,17 @@
+.btn {
+	display: inline-block;
+	font-size: rem(20);
+	padding: 10px;
+	min-width: 300px;
+	text-align: center;
+	transition: background-color 0.2s ease-in-out;
+	border-radius: rem(5);
+
+	color: $white;
+	&-blue {
+		background-color: $blue;
+		&:hover {
+			background-color: darken($blue, 10%);
+		}
+	}
+}

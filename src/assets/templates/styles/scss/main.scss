@@ -1,8 +1,7 @@
 @import 'vars';
 @import 'fonts';
+@import 'functions/functions';
 @import 'base/base';
-@import 'base/reset';
 @import 'base/utils';
-@import 'base/containers';
-
+@import 'components/btn';
 @import './blocks/*.scss';

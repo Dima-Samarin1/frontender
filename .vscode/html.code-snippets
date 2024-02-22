@@ -27,5 +27,10 @@
 			"</nav>"
 		],
 		"description": "nav"
+	},
+	"font-size": {
+		"prefix": "fz",
+		"body": ["font-size: rem($2);"],
+		"description": "font-size"
 	}
 }
