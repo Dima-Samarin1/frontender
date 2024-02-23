@@ -288,6 +288,7 @@ function startWatch() {
 	watch(path.watch.images, images)
 	watch(path.watch.svgicons, svgSprites)
 	watch(path.watch.resources, resources)
+	watch(path.watch.fonts, fonts)
 }
 
 function toProd(done) {
