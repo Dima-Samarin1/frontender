@@ -1,0 +1,48 @@
+@use "mixins" as *;
+html, body {
+  box-sizing: border-box;
+  height: 100%;
+  
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+  padding: 0;
+}
+
+p {
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  max-width: Rem(1170);
+  margin: 0 auto;
+  padding: 0 Rem(15);
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-size: Rem(15);
+}
+.wrapper {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  
+}
+.main {
+  flex-grow: 1;
+}
